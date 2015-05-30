@@ -35,16 +35,18 @@ class TodoList
 
   def view_todos
     system('clear')
-    puts "--------------------"
-    puts "---- TODO_LIST  ----"
-    puts "--------------------"
-
-    puts "\n---- Incomplete ----"
+    puts "-------____________-------"
+    puts "------| TODO-LIST  |------"
+    print "-------", "\u203E" * 12, "-------"
+    puts "\n       ____________"
+    puts "------- Incomplete -------"
+    print "       ", "\u203E" * 12, "\n"
     @incomplete_todos.each_with_index do |item, index|
       puts "#{index + 1}) #{item.entry}"
     end
-
-    puts "\n----  Completed ----"
+    puts "\n       ____________"
+    puts "------- Completed  -------"
+    print "       ", "\u203E" * 12, "\n"
     @complete_todos.each_with_index do |item, index|
       puts "#{index + 1}) #{item.entry}"
     end
@@ -59,10 +61,10 @@ class TodoList
   end
 
   def delete_todo
-    puts "Delete completed(1) or incompleted(2)? > "
-    delete_which = get_input.to_i
+    puts "Delete completed(1) or incompleted(2)? > (#) "
+    which = get_input.to_i
     puts "Which todo would you like to delete? > (#) "
-    if delete_which == 1
+    if which == 1
       index_id = @complete_todos[get_input.to_i - 1].id
       Todo.find(index_id).destroy
     else
@@ -72,10 +74,21 @@ class TodoList
   end
 
   def edit_todo
-    puts "Which todo would you like to edit? > (#) "
-    index_id = @incomplete_todos[get_input.to_i - 1]
-    puts "What should it be? > "
-    Todo.update(index_id, entry: get_input)
+    puts "Edit completed(1) or incomplete(2) ? > (#) "
+    which = get_input.to_i
+
+      if which == 1
+        puts "Which one would you like to edit? > (#) "
+        index_id = @complete_todos[get_input.to_i - 1].id
+        puts "What should it be? > "
+        Todo.update(index_id, entry: get_input)
+      else
+        puts "Which one would you like to edit? > (#) "
+        index_id = @incomplete_todos[get_input.to_i - 1].id
+        puts "What should it be? > "
+        Todo.update(index_id, entry: get_input)
+      end
+
   end
 
   def seperate_todos
