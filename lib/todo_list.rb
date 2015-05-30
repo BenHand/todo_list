@@ -4,25 +4,23 @@ require_relative "todo"
 
 class TodoList
 
-  def initialize
-
-  end
-
   def start
     loop do
       @todos = Todo.all
+      seperate_todos
       view_todos
 
       puts
       puts "What would you like to do?"
-      puts "(1) Exit \n(2) Add Todo \n(3) Mark Todo As Complete \n(4) Delete Existing Todo"
+      puts "(1) Exit \n(2) Add Todo \n(3) Mark Todo As Complete \n(4) Edit Existing Todo \n(5) Delete Existing Todo"
       print " > "
       action = gets.chomp.to_i
       case action
       when 1 then exit
       when 2 then add_todo
       when 3 then mark_todo
-      when 4 then delete_todo
+      when 4 then edit_todo
+      when 5 then delete_todo
       else
         puts "\a"
         puts "Not a valid choice"
@@ -37,29 +35,59 @@ class TodoList
 
   def view_todos
     system('clear')
-    puts "---- TODO::COMPLETED? ----"
-    @todos.each do |item|
-      puts "#{item.id}) #{item.entry} : #{status_display(item.completed)}"
+    puts "--------------------"
+    puts "---- TODO_LIST  ----"
+    puts "--------------------"
+
+    puts "\n---- Incomplete ----"
+    @incomplete_todos.each_with_index do |item, index|
+      puts "#{index + 1}) #{item.entry}"
+    end
+
+    puts "\n----  Completed ----"
+    @complete_todos.each_with_index do |item, index|
+      puts "#{index + 1}) #{item.entry}"
     end
 
   end
 
   def mark_todo
-    puts "which todo would you like to mark todone? > "
-    Todo.where(id: get_input).update_all(completed: true)
+    puts "which todo would you like to mark todone? > (#) "
+    index = (get_input.to_i - 1)
+    entry_id = @incomplete_todos[index].id
+    Todo.update(entry_id, completed: true)
   end
 
   def delete_todo
+    puts "Delete completed(1) or incompleted(2)? > "
+    delete_which = get_input.to_i
     puts "Which todo would you like to delete? > (#) "
-    Todo.find(get_input).destroy
+    if delete_which == 1
+      index_id = @complete_todos[get_input.to_i - 1].id
+      Todo.find(index_id).destroy
+    else
+      index_id = @incomplete_todos[get_input.to_i - 1].id
+      Todo.find(index_id).destroy
+    end
   end
 
-  def status_display(check_status)
+  def edit_todo
+    puts "Which todo would you like to edit? > (#) "
+    index_id = @incomplete_todos[get_input.to_i - 1]
+    puts "What should it be? > "
+    Todo.update(index_id, entry: get_input)
+  end
 
-    if check_status == false
-       "Incomplete"
-    else
-       "Completed"
+  def seperate_todos
+    @incomplete_todos = []
+    @complete_todos = []
+
+    @todos.each do |item|
+      if item.completed == false
+        @incomplete_todos << item
+      else
+        @complete_todos << item
+      end
     end
 
   end
@@ -68,9 +96,5 @@ class TodoList
   def get_input
     gets.chomp
   end
-
-  # def save!
-
-  # end
 
 end
