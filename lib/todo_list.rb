@@ -111,3 +111,4 @@ class TodoList
   end
 
 end
+TodoList.new.start
