@@ -29,7 +29,7 @@ class TodoList
   end
 
   def add_todo
-    puts "What is the todo you need to do? > "
+    puts "What is it you need todo? > "
     Todo.create(entry: get_input)
   end
 
