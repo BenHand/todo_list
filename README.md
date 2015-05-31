@@ -4,14 +4,14 @@ This is a functioning todo list app, with no known bugs (as of 05/31/15).
 Using this you can add/edit/delete/view your own todos in one interactive place.
 This project uses an sqlite3 database along with the ActiveRecord gem.
 
-```
-## Do the following in order to have your very own todo list!
 
+## Do the following in order to have your very own todo list!
+```
 (1) Fork this repo
 (2) Clone this repo
-
+```
 ## Do the Following steps from within the todo_list directory
-
+```
 (1) run `bundle install`
 (2) `rake db:migrate` to run the migration and update the database
 (3) run `ruby lib/todo_list.rb` to start the application
