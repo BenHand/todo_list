@@ -1,6 +1,6 @@
 require 'net/http'
-require_relative "../db/setup"
-require_relative "todo"
+# require_relative "../db/setup"
+# require_relative "todo"
 require 'json'
 require 'uri'
 
@@ -9,10 +9,6 @@ class TodoApp
   def start
     loop do
       @uri = URI('http://localhost:3000/todos')
-      # Net::HTTP.start(@uri.host, @uri.port) do |http|
-      #   request = Net::HTTP::Get.new @uri
-      #   response = http.request request
-      # end
       @todos = Net::HTTP.get(@uri)
 
 
@@ -65,13 +61,9 @@ class TodoApp
   def mark_todo
     puts "which todo would you like to mark todone? > (#) "
     index = (get_input.to_i - 1)
-    entry_id = @incomplete_todos[index]
+    index_id = @incomplete_todos[index]
 
-    uri = URI.parse("http://localhost:3000/todos/#{entry_id['id'].to_s}")
-    http = Net::HTTP.new(uri.host, uri.port)
-    request = Net::HTTP::Put.new(uri.request_uri)
-    request.set_form_data( {"complete" => 'true'} )
-    http.request(request)
+    update(index_id, {'complete' => 'true'})
   end
 
   def delete_todo
@@ -97,17 +89,21 @@ class TodoApp
     which = get_input.to_i
 
       if which == 1
-        puts "Which one would you like to edit? > (#) "
-        index_id = @complete_todos[get_input.to_i - 1].id
-        puts "What should it be? > "
-        TodoList.update(index_id, entry: get_input)
+        edit_todo_values(@complete_todos)
+      elsif which == 2
+        edit_todo_values(@incomplete_todos)
       else
-        puts "Which one would you like to edit? > (#) "
-        index_id = @incomplete_todos[get_input.to_i - 1].id
-        puts "What should it be? > "
-        TodoList.update(index_id, entry: get_input)
+        puts "invalid choice, please try again"
+        edit_todo
       end
 
+  end
+
+  def edit_todo_values(array)
+    puts "Which one would you like to edit? > (#) "
+    index_id = array[get_input.to_i - 1]
+    puts "What should it be? > "
+    update(index_id, { 'body' => get_input })
   end
 
   def seperate_todos
@@ -122,6 +118,14 @@ class TodoApp
       end
 
     end
+  end
+
+  def update(index_id, params = {})
+    uri = URI.parse("http://localhost:3000/todos/#{index_id['id'].to_s}")
+    http = Net::HTTP.new(uri.host, uri.port)
+    request = Net::HTTP::Put.new(uri.request_uri)
+    request.set_form_data(params)
+    http.request(request)
   end
 
   def delete(index_id)
