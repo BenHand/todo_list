@@ -61,15 +61,17 @@ class TodoApp
     end
 
   end
-# require 'pry'
+
   def mark_todo
     puts "which todo would you like to mark todone? > (#) "
     index = (get_input.to_i - 1)
     entry_id = @incomplete_todos[index]
-    # TodoList.update(entry_id, completed: true)
-    http = Net::HTTP.new('http://localhost:3000')
-    http.send_request('PUT', '/todos', { "complete" => 'true' })
-    # binding.pry
+
+    uri = URI.parse("http://localhost:3000/todos/#{entry_id['id'].to_s}")
+    http = Net::HTTP.new(uri.host, uri.port)
+    request = Net::HTTP::Put.new(uri.request_uri)
+    request.set_form_data( {"complete" => 'true'} )
+    http.request(request)
   end
 
   def delete_todo
