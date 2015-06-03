@@ -1,12 +1,21 @@
+require 'net/http'
 require_relative "../db/setup"
 require_relative "todo"
+require 'json'
+require 'uri'
 
-
-class TodoList
+class TodoApp
 
   def start
     loop do
-      @todos = Todo.all
+      @uri = URI('http://localhost:3000/todos')
+      # Net::HTTP.start(@uri.host, @uri.port) do |http|
+      #   request = Net::HTTP::Get.new @uri
+      #   response = http.request request
+      # end
+      @todos = Net::HTTP.get(@uri)
+
+
       seperate_todos
       view_todos
 
@@ -30,7 +39,7 @@ class TodoList
 
   def add_todo
     puts "What is it you need todo? > "
-    Todo.create(entry: get_input)
+    Net::HTTP.post_form(@uri, {'body' => get_input })
   end
 
   def view_todos
@@ -42,22 +51,25 @@ class TodoList
     puts "------- Incomplete -------"
     print "       ", "\u203E" * 12, "\n"
     @incomplete_todos.each_with_index do |item, index|
-      puts "#{index + 1}) #{item.entry}"
+      puts "#{index + 1}) #{item['body']}"
     end
     puts "\n       ____________"
     puts "------- Completed  -------"
     print "       ", "\u203E" * 12, "\n"
     @complete_todos.each_with_index do |item, index|
-      puts "#{index + 1}) #{item.entry}"
+      puts "#{index + 1}) #{item['body']}"
     end
 
   end
-
+# require 'pry'
   def mark_todo
     puts "which todo would you like to mark todone? > (#) "
     index = (get_input.to_i - 1)
-    entry_id = @incomplete_todos[index].id
-    Todo.update(entry_id, completed: true)
+    entry_id = @incomplete_todos[index]
+    # TodoList.update(entry_id, completed: true)
+    http = Net::HTTP.new('http://localhost:3000')
+    http.send_request('PUT', '/todos', { "complete" => 'true' })
+    # binding.pry
   end
 
   def delete_todo
@@ -66,10 +78,10 @@ class TodoList
     puts "Which todo would you like to delete? > (#) "
     if which == 1
       index_id = @complete_todos[get_input.to_i - 1].id
-      Todo.find(index_id).destroy
+      TodoList.find(index_id).destroy
     else
       index_id = @incomplete_todos[get_input.to_i - 1].id
-      Todo.find(index_id).destroy
+      TodoList.find(index_id).destroy
     end
   end
 
@@ -81,28 +93,28 @@ class TodoList
         puts "Which one would you like to edit? > (#) "
         index_id = @complete_todos[get_input.to_i - 1].id
         puts "What should it be? > "
-        Todo.update(index_id, entry: get_input)
+        TodoList.update(index_id, entry: get_input)
       else
         puts "Which one would you like to edit? > (#) "
         index_id = @incomplete_todos[get_input.to_i - 1].id
         puts "What should it be? > "
-        Todo.update(index_id, entry: get_input)
+        TodoList.update(index_id, entry: get_input)
       end
 
   end
-
+require 'pry'
   def seperate_todos
     @incomplete_todos = []
     @complete_todos = []
 
-    @todos.each do |item|
-      if item.completed == false
-        @incomplete_todos << item
+    JSON.parse(@todos).each do |k|
+      if k['complete'] == false
+        @incomplete_todos << k
       else
-        @complete_todos << item
+        @complete_todos << k
       end
-    end
 
+    end
   end
 
   private
@@ -111,4 +123,4 @@ class TodoList
   end
 
 end
-TodoList.new.start
+TodoApp.new.start
