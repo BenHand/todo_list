@@ -78,13 +78,18 @@ class TodoApp
     puts "Delete completed(1) or incompleted(2)? > (#) "
     which = get_input.to_i
     puts "Which todo would you like to delete? > (#) "
+
     if which == 1
-      index_id = @complete_todos[get_input.to_i - 1].id
-      TodoList.find(index_id).destroy
+      index_id = @complete_todos[get_input.to_i - 1]
+      delete(index_id)
+    elsif which == 2
+      index_id = @incomplete_todos[get_input.to_i - 1]
+      delete(index_id)
     else
-      index_id = @incomplete_todos[get_input.to_i - 1].id
-      TodoList.find(index_id).destroy
+      puts "invalid choice, please try again"
+      delete_todo
     end
+
   end
 
   def edit_todo
@@ -104,7 +109,7 @@ class TodoApp
       end
 
   end
-require 'pry'
+
   def seperate_todos
     @incomplete_todos = []
     @complete_todos = []
@@ -117,6 +122,13 @@ require 'pry'
       end
 
     end
+  end
+
+  def delete(index_id)
+    uri = URI("http://localhost:3000/todos/#{index_id['id'].to_s}")
+    http = Net::HTTP.new(uri.host, uri.port)
+    req = Net::HTTP::Delete.new(uri.path)
+    http.request(req)
   end
 
   private
