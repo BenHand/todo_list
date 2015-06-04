@@ -123,9 +123,9 @@ class TodoApp
   def update(index_id, params = {})
     uri = URI.parse("http://localhost:3000/todos/#{index_id['id'].to_s}")
     http = Net::HTTP.new(uri.host, uri.port)
-    request = Net::HTTP::Put.new(uri.request_uri)
-    request.set_form_data(params)
-    http.request(request)
+    req = Net::HTTP::Put.new(uri.request_uri)
+    req.set_form_data(params)
+    http.request(req)
   end
 
   def delete(index_id)
@@ -134,6 +134,7 @@ class TodoApp
     req = Net::HTTP::Delete.new(uri.path)
     http.request(req)
   end
+
 
   private
   def get_input
