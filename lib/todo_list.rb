@@ -1,6 +1,6 @@
-require 'net/http'
 # require_relative "../db/setup"
 # require_relative "todo"
+require 'net/http'
 require 'json'
 require 'uri'
 
@@ -62,7 +62,6 @@ class TodoApp
     puts "which todo would you like to mark todone? > (#) "
     index = (get_input.to_i - 1)
     index_id = @incomplete_todos[index]
-
     update(index_id, {'complete' => 'true'})
   end
 
@@ -81,7 +80,6 @@ class TodoApp
       puts "invalid choice, please try again"
       delete_todo
     end
-
   end
 
   def edit_todo
@@ -96,14 +94,6 @@ class TodoApp
         puts "invalid choice, please try again"
         edit_todo
       end
-
-  end
-
-  def edit_todo_values(array)
-    puts "Which one would you like to edit? > (#) "
-    index_id = array[get_input.to_i - 1]
-    puts "What should it be? > "
-    update(index_id, { 'body' => get_input })
   end
 
   def seperate_todos
@@ -116,8 +106,14 @@ class TodoApp
       else
         @complete_todos << k
       end
-
     end
+  end
+
+  def edit_todo_values(array)
+    puts "Which one would you like to edit? > (#) "
+    index_id = array[get_input.to_i - 1]
+    puts "What should it be? > "
+    update(index_id, { 'body' => get_input })
   end
 
   def update(index_id, params = {})
